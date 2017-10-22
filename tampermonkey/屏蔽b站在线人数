@@ -1,0 +1,115 @@
+// ==UserScript==
+// @name         New Userscript
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @description  try to take over the world!
+// @author       You
+// @match        www.bilibili.com/video/online.html
+// @grant        none
+// ==/UserScript==
+
+
+    // Your code here...
+//油猴有点限制，就是他不能在页面加载前运行css，就会造成flicker的，所以隐藏的任务就就交给stylish了
+//    var styleElement = document.createElement("style");
+//    styleElement.setAttribute("id", "stylish-3");
+//    styleElement.setAttribute("type", "text/css");
+
+//    styleElement.appendChild(document.createTextNode(".ebox {display: none !important;}"));
+
+//    document.documentElement.appendChild(document.importNode(styleElement,true));
+
+    var filterKeyword=[
+        "刘哔电影",
+        "ASMR",
+        "二手车知识大讲堂",
+        "每日撸报",
+        "靠脸吃饭的徐大王",
+        "起小点是大腿",
+        "韩剧",
+        "papi酱",
+        "木鱼水心",
+        "柚子木字幕组",
+        "Rainie田",
+        "阿斗归来了",
+        "大司马",
+        "主播",
+        "长歌是大腿",
+        "刘老师说电影",
+        "LexBurner",
+        "轩子巨2兔",
+        "电影最TOP",
+        "王者荣耀",
+        "拳师小七",
+        "有妖气动漫",
+        "腾讯动漫",
+        "暴走漫画",
+        "TF家族",
+        "卢本伟",
+        "若鸿文化",
+        "中国BOY超级大猩猩",
+        "H萌团队",
+        "综艺",
+        "月爱",
+        "怕上火暴王老菊",
+        "旭旭宝宝",
+        "长歌是大腿",
+        "王者荣耀",
+        "英雄联盟",
+        "聚印象视频",
+        "史丹利Studio",
+        "PDD在B站",
+        "山下智博",
+        "玩加赛事LOL",
+        "阅后即瞎",
+        "经典影视剧",
+        "星际老男孩",
+        "宫本狗雨",
+        "拂菻坊",
+        "博人传"
+    ];
+
+    function hasKeyword(sourceString)
+    {
+        for(var i=0;i<filterKeyword.length;i++)
+        {
+            if(filterKeyword[i].trim().length===0)
+            {
+                continue;
+            }
+
+            if(sourceString!==null && sourceString.indexOf(filterKeyword[i].trim())!=-1)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    function changecss()
+    {
+        var eboxs = document.getElementsByClassName("ebox");
+
+        for (var i = 0;i<eboxs.length;i++)
+        {
+            var curElement = eboxs[i];
+            if(!hasKeyword(eboxs[i].innerText))
+            {
+                // curElement.style.display="none";
+                eboxs[i].style.cssText=eboxs[i].style.cssText+"display:block !important;";
+            }
+
+
+             console.log(eboxs[i].innerHTML);
+             console.log(eboxs[i].style.cssText);
+        }
+    }
+
+        console.log("changecss");
+        changecss();
+(function() {
+    'use strict';
+
+    // Your code here...
+})();
