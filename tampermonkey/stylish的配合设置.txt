@@ -1,0 +1,2 @@
+//加上这句才能no flicker
+.ebox {display: none !important;}
