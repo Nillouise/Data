@@ -11,6 +11,7 @@
 
     // Your code here...
 //油猴有点限制，就是他不能在页面加载前运行css，就会造成flicker的，所以隐藏的任务就就交给stylish了
+//注意，据孙明琦说，可以通过在 在脚本的设置里面，运行时期调成document-start就行了。
 //    var styleElement = document.createElement("style");
 //    styleElement.setAttribute("id", "stylish-3");
 //    styleElement.setAttribute("type", "text/css");
@@ -18,6 +19,8 @@
 //    styleElement.appendChild(document.createTextNode(".ebox {display: none !important;}"));
 
 //    document.documentElement.appendChild(document.importNode(styleElement,true));
+
+
 
     var filterKeyword=[
         "刘哔电影",
@@ -66,7 +69,8 @@
         "星际老男孩",
         "宫本狗雨",
         "拂菻坊",
-        "博人传"
+        "博人传",
+        "Running Man"
     ];
 
     function hasKeyword(sourceString)
