@@ -1,326 +1,117 @@
-#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
-; #Warn  ; Enable warnings to assist with detecting common errors.
-SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+; Old script drew four rectangles to create a box around controls; this
+; modification changes it to show a single, transparent, click-through overlay
 
-#MaxHotkeysPerInterval 2000
-#SingleInstance force
-CoordMode, Mouse, Screen  ; Place ToolTips at absolute screen coordinates:
-;MouseGetPos, X, Y
-X:=0
-Y:=0
-
-defaultSpeedX:=3
-defaultSpeedY:=3
-SpeedX:=defaultSpeedX
-SpeedY:=defaultSpeedY
-SpeedX2 := 8
-SpeedY2 := 8
-TotalSpeedL1 := 5 
-TotalSpeedL2 :=1
-TotalSpeed := TotalSpeedL1
-TotalSpeedCnt := 0
-
-PreUp := 1
-PreDown :=1
-PreLeft :=1
-PreRight :=1
-PreUpD :=0
-PreDownD :=0
-PreLeftD :=0
-PreRightD :=0
-
-UpdateTme:=0
-StartTime:=0
-;ToolTip, %StartTime%;
-
-Pos1 = q
-Pos2 = w
-Pos3 = e
-Pos4 = a
-Pos5 = s
-Pos6 = d
-
-
-ON := 0
-
-Up = i
-Down = k
-Left = j
-Right = l
-
-interval := 200
-gap := 1000
-
-Hotkey ,%Up%,UpDown
-Hotkey ,%Up% Up,UpUp
-Hotkey ,%Down%,DownDown
-Hotkey ,%Down% Up,DownUp
-Hotkey ,%Left%,LeftDown
-Hotkey ,%Left% Up,LeftUp
-Hotkey ,%Right%,RightDown
-Hotkey ,%Right% Up,RightUp
-
-Hotkey ,%Pos1%,Area1
-Hotkey ,%Pos2%,Area2
-Hotkey ,%Pos3%,Area3
-Hotkey ,%Pos4%,Area4
-Hotkey ,%Pos5%,Area5
-Hotkey ,%Pos6%,Area6
-
-
-
-
-Suspend,On
-loop
-{
-	sleep,1
-	if((Abs(X)=SpeedX2||Abs(Y)=SpeedY2)&&ON=1)
-	{
-		MouseMove, X,Y,TotalSpeedL2,R
-	}else{
-		MouseMove, X,Y,TotalSpeedL1,R
-	}
-	
-;	ToolTip, %StartTime%dfd
-	;MsgBox, Text
-	if(A_TickCount - StartTime<2000|| A_TickCount - UpdateTme<gap)
-	{
-		ON := 1
-;		ToolTip, %StartTime%-%UpdateTme%-%A_TickCount%;
-	}else{
-		ON:=0
-	}
-	if(ON=0)
-	{
-		Suspend,On
-;		ToolTip, %StartTime%-%UpdateTme% ;
-	}
-	
+; Box_Init - Creates the necessary GUIs.
+; C - The color of the box.
+Var:=555
+Box_Init(C="FF0000") {
+  ; Added WS_EXTENDED_TRANSPARENT to make the overlay click-through
+  Gui,+E0x20 +ToolWindow -Caption +AlwaysOnTop +LastFound
+  ; Set window to 50% transparency
+  WinSet,Transparent,128
+  Gui,Color, % C
+  Gui,font,s15w1000,Verdana
+  Gui,Add, Text,X3Y3 vVar,000
 }
-return
-;MouseMove, 0,60,50,R
-;MouseMove, 60,0,50,R
+
+; Box_Draw - Draws a box on the screen using 4 GUIs.
+; X - The X coord.
+; Y - The Y coord.
+; W - The width of the box.
+; H - The height of the box.
+Box_Draw(X, Y, W, H, curtime, O="I") {
+	;MsgBox, Value Is: %X% %Y%
+  ; No longer adding to the height since using only a single rectangle
+  If(W < 0)
+    X += W, W *= -1
+  If(H < 0)
+    Y += H, H *= -1
+  ; Removed the options and calculation for the border (T and O) since it no
+  ; longer applies. Now the drawing dimensions are completely straight-forward.
+  ttime:=curtime
+  GuiControl,,Var,%ttime%
+  Gui, Show, % "x" X " y" Y " w" W " h" H " NA"
+}
+
+; Box_Destroy - Destoyes the 4 GUIs.
+Box_Destroy() {
+  Gui,Destroy
+}
+
+; Box_Hide - Hides the GUI.
+Box_Hide() {
+  Gui,Hide
+}
+
+; Initialize the script and overlay
+#SingleInstance,force
+SetBatchLines, -1
+SetWinDelay, -1
+Box_Init("FF0000")
+;自变量
+IV := 105
+;阿基米德的系数
+a := 1.0
+b := 5.0
+;屏幕大小
+height:=1080
+width:=1920
+
+; Track the mouse position and draw an overlay over the control being hovered over
 
 
-;一定要放在第一句
-$end::
-	Suspend,Off 
-	ON:=1
-;	ToolTip,%UpdateTme%-%ON%
-	StartTime:=A_TickCount
-	UpdateTme:=A_TickCount
-;	ToolTip, %UpdateTme%
-;	ToolTip,%UpdateTme%-%ON%
-	
+
+elaspTime:=0
+presec :=0
+ON:=1
+
+if(A_Sec!=presec)
+{
+	elaspTime:=elaspTime+1
+	presec:=A_Sec
+}
+Loop {
+if(ON==0)
+{
+Box_Hide()
+  Sleep, 20
+  continue
+}
+
+ ; MouseGetPos, , , Window, Control, 2
+ ; WinGetPos, X1, Y1, , , ahk_id %Window%
+ ; ControlGetPos, X, Y, W, H, , ahk_id %Control%
+  TX := (a+b*IV)*cos(IV)
+  TY := (a+b*IV)*sin(IV)
+
+;  if (X)
+ ; MsgBox, Value Is: %TX% %TY%
+    Box_Draw( width/2 + TX,height/2+ TY, 50, 50,elaspTime)
+	MID:=10.0
+	Loop{
+  NX := (a+b*IV)*cos(IV-MID)
+  NY := (a+b*IV)*sin(IV-MID)
+  if(abs(TX-NX)+abs(TY-NY)<0.5)
+ ; if(1==1)
+  {
+	break
+  }else
+  {
+  MID:=MID/2.0
+  }
+	}
+  IV:=IV-MID
+  if(A_Sec!=presec)
+{
+	elaspTime:=elaspTime+1
+	presec:=A_Sec
+}
+  Sleep, 20
+}
+#WheelUp::
+	ON:=1-ON
+	elaspTime:=0
+	IV := 105
 	return
-
-UpDown:
-	if(ON=1)
-	{
-		UpdateTme := A_TickCount
-;		ToolTip, %A_TickCount%-%StartTime%-%UpdateTme%-%A_TickCount%;
-		
-	}else{
-		
-	}
-	if(PreUpD>PreUp)
-	{
-		return
-	}
-	PreUpD := A_TickCount
-	if(A_TickCount-PreUp<interval||Y=-SpeedY2||Abs(X)=SpeedX2)
-	{
-		Y:=-SpeedY2
-		
-	}else{
-		Y:=-SpeedY
-	}
-;	ToolTip, %A_TickCount% ;
-;	ToolTip,%A_TickCount%-%PreUp%;
-	return
-UpUp:
-
-	
-	if(Y<0)
-	{
-		Y:=0
-	}
-	PreUp := A_TickCount
-	return
-
-DownDown:
-	if(ON=1)
-	{
-		UpdateTme := A_TickCount
-	}
-
-	if(PreDownD>PreDown)
-	{
-		return
-	}
-	PreDownD := A_TickCount
-
-
-	if(A_TickCount-PreDown<interval||Y=SpeedY2|| Abs(X)=SpeedX2 )
-	{
-		Y:=SpeedY2
-	}else{
-		Y:=SpeedY
-	}
-	return
-DownUp:
-
-	if(Y>0)
-	{
-		Y:=0
-	}
-	PreDown := A_TickCount
-	return
-	
-LeftDown:
-	if(ON=1)
-	{
-		UpdateTme := A_TickCount
-	}
-
-	if(PreLeftD>PreLeft)
-	{
-		return
-	}
-	PreLeftD := A_TickCount
-	
-	if(A_TickCount-PreLeft<interval||X=-SpeedX2||Abs(Y)==SpeedY2)
-	{
-		X:=-SpeedX2
-	}else{
-		X:=-SpeedX
-	}
-	return
-LeftUp:
-	if(X<0)
-	{
-		X:=0
-	}
-	PreLeft := A_TickCount
-	return
-
-RightDown:
-	if(ON=1)
-	{
-		UpdateTme := A_TickCount
-	}
-	if(PreRightD>PreRight)
-	{
-		return
-	}
-	PreRightD := A_TickCount
-
-	if(A_TickCount-PreRight<interval||X=SpeedX2||Abs(Y)==SpeedY2)
-	{
-		X:=SpeedX2
-	}else{
-		X:=SpeedX
-	}
-	return
-RightUp:
-	if(X>0)
-	{
-		X:=0
-	}
-	PreRight := A_TickCount
-	return
-
-	
-Area1:
-	if(ON=1)
-	{
-		UpdateTme := A_TickCount
-	}
-	cx:=A_ScreenWidth/3 - A_ScreenWidth/6
-	cy:= A_ScreenHeight/2 - A_ScreenHeight/4
-	MouseMove, cx,cy,0
-	return
-	
-	
-Area2:
-	if(ON=1)
-	{
-		UpdateTme := A_TickCount
-	}
-	cx:=A_ScreenWidth/3 + A_ScreenWidth/6
-	cy:= A_ScreenHeight/2 - A_ScreenHeight/4
-	MouseMove, cx,cy,0
-	return
-	
-
-Area3:
-	if(ON=1)
-	{
-		UpdateTme := A_TickCount
-	}
-	cx:=A_ScreenWidth/3+ A_ScreenWidth/3 + A_ScreenWidth/6
-	cy:= A_ScreenHeight/2 - A_ScreenHeight/4
-	MouseMove, cx,cy,0
-	return
-	
-Area4:
-	if(ON=1)
-	{
-		UpdateTme := A_TickCount
-	}
-	cx:=A_ScreenWidth/3 - A_ScreenWidth/6
-	cy:= A_ScreenHeight/2 + A_ScreenHeight/4
-	MouseMove, cx,cy,0
-	return
-	
-	
-Area5:
-	if(ON=1)
-	{
-		UpdateTme := A_TickCount
-	}
-	cx:=A_ScreenWidth/3 + A_ScreenWidth/6
-	cy:= A_ScreenHeight/2 + A_ScreenHeight/4
-	MouseMove, cx,cy,0
-	return
-	
-	
-Area6:
-	if(ON=1)
-	{
-		UpdateTme := A_TickCount
-	}
-	cx:=A_ScreenWidth/3 + A_ScreenWidth/3 + A_ScreenWidth/6
-	cy:= A_ScreenHeight/2 + A_ScreenHeight/4
-	MouseMove, cx,cy,0
-	return
-	
-	
-;x是左键，c是右键
-x::
-	if(ON=1)
-	{
-		UpdateTme := A_TickCount
-;		ToolTip, %UpdateTme%;
-	}
-	Click
-
-c::
-	if(ON=1)
-	{
-		UpdateTme := A_TickCount
-;		ToolTip, %UpdateTme%;
-	}
-	Click, right
-	
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
+; Convenient way to quit (useful when not using transparency—oops)
+;esc::exitapp
